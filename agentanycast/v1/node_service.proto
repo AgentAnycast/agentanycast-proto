@@ -44,12 +44,12 @@ service NodeService {
   rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse);
 
   // SubscribeTaskUpdates streams status updates for a specific task.
-  rpc SubscribeTaskUpdates(SubscribeTaskUpdatesRequest) returns (stream TaskUpdateEvent);
+  rpc SubscribeTaskUpdates(SubscribeTaskUpdatesRequest) returns (stream SubscribeTaskUpdatesResponse);
 
   // ── Task Operations (Server Mode) ─────────────────────────
 
   // SubscribeIncomingTasks streams new task requests from remote agents.
-  rpc SubscribeIncomingTasks(SubscribeIncomingTasksRequest) returns (stream IncomingTaskEvent);
+  rpc SubscribeIncomingTasks(SubscribeIncomingTasksRequest) returns (stream SubscribeIncomingTasksResponse);
 
   // UpdateTaskStatus updates the status of a task this node is processing.
   rpc UpdateTaskStatus(UpdateTaskStatusRequest) returns (UpdateTaskStatusResponse);
@@ -136,7 +136,7 @@ message SubscribeTaskUpdatesRequest {
   string task_id = 1;
 }
 
-message TaskUpdateEvent {
+message SubscribeTaskUpdatesResponse {
   string task_id = 1;
   TaskStatus status = 2;
   Message message = 3;       // optional status message
@@ -147,7 +147,7 @@ message TaskUpdateEvent {
 
 message SubscribeIncomingTasksRequest {}
 
-message IncomingTaskEvent {
+message SubscribeIncomingTasksResponse {
   Task task = 1;
   AgentCard sender_card = 2; // card of the agent that sent the task
 }

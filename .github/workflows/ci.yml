@@ -45,6 +45,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ github.token }}
+
+      - name: Generate code from proto
+        run: buf generate
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
