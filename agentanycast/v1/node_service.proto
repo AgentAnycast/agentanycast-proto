@@ -1,0 +1,176 @@
+syntax = "proto3";
+
+package agentanycast.v1;
+
+option go_package = "github.com/agentanycast/agentanycast-proto/gen/go/agentanycast/v1;agentanycastv1";
+
+import "agentanycast/v1/common.proto";
+import "agentanycast/v1/agent_card.proto";
+import "agentanycast/v1/a2a_models.proto";
+
+// NodeService is the gRPC interface between the Python SDK and the Go Daemon.
+// It runs over a Unix Domain Socket for local IPC.
+service NodeService {
+
+  // ── Node Management ────────────────────────────────────────
+
+  // GetNodeInfo returns the local node's PeerID, addresses, NAT type, etc.
+  rpc GetNodeInfo(GetNodeInfoRequest) returns (GetNodeInfoResponse);
+
+  // SetAgentCard sets or updates this node's A2A Agent Card.
+  rpc SetAgentCard(SetAgentCardRequest) returns (SetAgentCardResponse);
+
+  // ── Peer Management ────────────────────────────────────────
+
+  // ConnectPeer initiates a connection to a remote peer by PeerID.
+  // The daemon will attempt direct connection, then relay.
+  rpc ConnectPeer(ConnectPeerRequest) returns (ConnectPeerResponse);
+
+  // ListPeers returns all currently connected peers.
+  rpc ListPeers(ListPeersRequest) returns (ListPeersResponse);
+
+  // GetPeerCard retrieves the Agent Card of a connected peer.
+  rpc GetPeerCard(GetPeerCardRequest) returns (GetPeerCardResponse);
+
+  // ── Task Operations (Client Mode) ─────────────────────────
+
+  // SendTask sends an A2A Task to a remote agent.
+  rpc SendTask(SendTaskRequest) returns (SendTaskResponse);
+
+  // GetTask retrieves the current state of a task.
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
+
+  // CancelTask requests cancellation of a task.
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse);
+
+  // SubscribeTaskUpdates streams status updates for a specific task.
+  rpc SubscribeTaskUpdates(SubscribeTaskUpdatesRequest) returns (stream TaskUpdateEvent);
+
+  // ── Task Operations (Server Mode) ─────────────────────────
+
+  // SubscribeIncomingTasks streams new task requests from remote agents.
+  rpc SubscribeIncomingTasks(SubscribeIncomingTasksRequest) returns (stream IncomingTaskEvent);
+
+  // UpdateTaskStatus updates the status of a task this node is processing.
+  rpc UpdateTaskStatus(UpdateTaskStatusRequest) returns (UpdateTaskStatusResponse);
+
+  // CompleteTask marks a task as completed with artifacts.
+  rpc CompleteTask(CompleteTaskRequest) returns (CompleteTaskResponse);
+
+  // FailTask marks a task as failed with an error.
+  rpc FailTask(FailTaskRequest) returns (FailTaskResponse);
+}
+
+// ── Node Management Messages ───────────────────────────────
+
+message GetNodeInfoRequest {}
+
+message GetNodeInfoResponse {
+  NodeInfo node_info = 1;
+}
+
+message SetAgentCardRequest {
+  AgentCard card = 1;
+}
+
+message SetAgentCardResponse {}
+
+// ── Peer Management Messages ───────────────────────────────
+
+message ConnectPeerRequest {
+  string peer_id = 1;
+  // Optional: multiaddrs to try. If empty, uses relay/DHT for discovery.
+  repeated string addresses = 2;
+}
+
+message ConnectPeerResponse {
+  PeerInfo peer_info = 1;
+}
+
+message ListPeersRequest {}
+
+message ListPeersResponse {
+  repeated PeerInfo peers = 1;
+}
+
+message GetPeerCardRequest {
+  string peer_id = 1;
+}
+
+message GetPeerCardResponse {
+  AgentCard card = 1;
+}
+
+// ── Task Client Messages ───────────────────────────────────
+
+message SendTaskRequest {
+  string peer_id = 1;
+  Message message = 2;
+  // Optional: target a specific skill on the remote agent.
+  string target_skill_id = 3;
+  // Optional: group tasks under a shared context.
+  string context_id = 4;
+}
+
+message SendTaskResponse {
+  Task task = 1;
+}
+
+message GetTaskRequest {
+  string task_id = 1;
+}
+
+message GetTaskResponse {
+  Task task = 1;
+}
+
+message CancelTaskRequest {
+  string task_id = 1;
+}
+
+message CancelTaskResponse {
+  Task task = 1;
+}
+
+message SubscribeTaskUpdatesRequest {
+  string task_id = 1;
+}
+
+message TaskUpdateEvent {
+  string task_id = 1;
+  TaskStatus status = 2;
+  Message message = 3;       // optional status message
+  repeated Artifact artifacts = 4; // populated on completion
+}
+
+// ── Task Server Messages ───────────────────────────────────
+
+message SubscribeIncomingTasksRequest {}
+
+message IncomingTaskEvent {
+  Task task = 1;
+  AgentCard sender_card = 2; // card of the agent that sent the task
+}
+
+message UpdateTaskStatusRequest {
+  string task_id = 1;
+  TaskStatus status = 2;
+  Message message = 3; // optional accompanying message
+}
+
+message UpdateTaskStatusResponse {}
+
+message CompleteTaskRequest {
+  string task_id = 1;
+  repeated Artifact artifacts = 2;
+  Message message = 3; // optional final message
+}
+
+message CompleteTaskResponse {}
+
+message FailTaskRequest {
+  string task_id = 1;
+  string error_message = 2;
+}
+
+message FailTaskResponse {}
