@@ -13,3 +13,14 @@ plugins:
     out: gen/python
   - remote: buf.build/grpc/python
     out: gen/python
+
+  # TypeScript code generation (requires: npm install -g ts-proto)
+  # Generates @grpc/grpc-js compatible service stubs.
+  - local: protoc-gen-ts_proto
+    out: gen/ts
+    opt:
+      - outputServices=grpc-js
+      - esModuleInterop=true
+      - env=node
+      - useOptionals=messages
+      - oneof=unions

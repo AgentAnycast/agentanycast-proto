@@ -1,6 +1,11 @@
 # Generated code
 gen/
 
+# npm (used for ts-proto codegen plugin)
+node_modules/
+package.json
+package-lock.json
+
 # OS
 .DS_Store
 *.swp

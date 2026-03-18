@@ -35,4 +35,8 @@ message P2PExtension {
   string peer_id = 1;
   repeated string supported_transports = 2; // e.g. ["tcp", "quic"]
   repeated string relay_addresses = 3;
+  // Optional W3C DID (did:key method) derived from the node's Ed25519 public key.
+  // Populated automatically by the daemon. Enables interoperability with
+  // DID-based ecosystems such as ANP.
+  string did_key = 4;
 }
