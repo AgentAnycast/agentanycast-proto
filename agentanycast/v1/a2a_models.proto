@@ -6,6 +6,7 @@ option go_package = "github.com/agentanycast/agentanycast-proto/gen/go/agentanyc
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
+import "agentanycast/v1/streaming.proto";
 
 // ─────────────────────────────────────────────────────────────
 // Task — the fundamental unit of work in the A2A protocol.
@@ -115,6 +116,10 @@ message A2AEnvelope {
     GetTaskPayload get_task = 15;
     GetTaskResponsePayload get_task_response = 16;
     AckPayload ack = 17;
+    // Streaming payloads (v0.2)
+    StreamStart stream_start = 18;
+    StreamChunk stream_chunk = 19;
+    StreamEnd stream_end = 20;
   }
 }
 
@@ -128,6 +133,10 @@ enum EnvelopeType {
   ENVELOPE_TYPE_GET_TASK = 6;
   ENVELOPE_TYPE_GET_TASK_RESPONSE = 7;
   ENVELOPE_TYPE_ACK = 8;
+  // Streaming types (v0.2)
+  ENVELOPE_TYPE_STREAM_START = 9;
+  ENVELOPE_TYPE_STREAM_CHUNK = 10;
+  ENVELOPE_TYPE_STREAM_END = 11;
 }
 
 // ── Envelope Payloads ────────────────────────────────────────

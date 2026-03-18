@@ -7,6 +7,8 @@ option go_package = "github.com/agentanycast/agentanycast-proto/gen/go/agentanyc
 import "agentanycast/v1/common.proto";
 import "agentanycast/v1/agent_card.proto";
 import "agentanycast/v1/a2a_models.proto";
+import "agentanycast/v1/streaming.proto";
+import "agentanycast/v1/registry_service.proto";
 
 // NodeService is the gRPC interface between the Python SDK and the Go Daemon.
 // It runs over a Unix Domain Socket for local IPC.
@@ -35,6 +37,7 @@ service NodeService {
   // ── Task Operations (Client Mode) ─────────────────────────
 
   // SendTask sends an A2A Task to a remote agent.
+  // Supports three addressing modes: peer_id, skill_id (anycast), or url (HTTP bridge).
   rpc SendTask(SendTaskRequest) returns (SendTaskResponse);
 
   // GetTask retrieves the current state of a task.
@@ -59,6 +62,19 @@ service NodeService {
 
   // FailTask marks a task as failed with an error.
   rpc FailTask(FailTaskRequest) returns (FailTaskResponse);
+
+  // ── Streaming (v0.2) ──────────────────────────────────────
+
+  // SubscribeTaskStream receives streaming artifact chunks for a task.
+  rpc SubscribeTaskStream(SubscribeTaskStreamRequest) returns (stream SubscribeTaskStreamResponse);
+
+  // SendStreamingArtifact sends streaming artifact chunks from the server agent.
+  rpc SendStreamingArtifact(stream SendStreamingArtifactRequest) returns (SendStreamingArtifactResponse);
+
+  // ── Discovery (v0.2) ──────────────────────────────────────
+
+  // Discover finds agents that offer a specific skill via the Relay registry.
+  rpc Discover(DiscoverRequest) returns (DiscoverResponse);
 }
 
 // ── Node Management Messages ───────────────────────────────
@@ -104,12 +120,14 @@ message GetPeerCardResponse {
 // ── Task Client Messages ───────────────────────────────────
 
 message SendTaskRequest {
-  string peer_id = 1;
-  Message message = 2;
-  // Optional: target a specific skill on the remote agent.
-  string target_skill_id = 3;
-  // Optional: group tasks under a shared context.
-  string context_id = 4;
+  // Target addressing — exactly one must be set.
+  oneof target {
+    string peer_id = 1;     // Direct: send to a specific PeerID.
+    string skill_id = 2;    // Anycast: route by capability.
+    string url = 3;         // HTTP Bridge: call an external HTTP A2A agent.
+  }
+  Message message = 10;
+  map<string, string> metadata = 11;
 }
 
 message SendTaskResponse {
@@ -174,3 +192,47 @@ message FailTaskRequest {
 }
 
 message FailTaskResponse {}
+
+// ── Streaming Messages (v0.2) ──────────────────────────────
+
+message SubscribeTaskStreamRequest {
+  string task_id = 1;
+}
+
+message SubscribeTaskStreamResponse {
+  oneof event {
+    StreamStart stream_start = 1;
+    StreamChunk stream_chunk = 2;
+    StreamEnd stream_end = 3;
+  }
+}
+
+message SendStreamingArtifactRequest {
+  oneof event {
+    StreamStart stream_start = 1;
+    StreamChunk stream_chunk = 2;
+    StreamEnd stream_end = 3;
+  }
+}
+
+message SendStreamingArtifactResponse {}
+
+// ── Discovery Messages (v0.2) ──────────────────────────────
+
+message DiscoverRequest {
+  string skill_id = 1;
+  map<string, string> tags = 2; // optional tag filters
+  int32 limit = 3;              // max results (0 = default)
+}
+
+message DiscoverResponse {
+  repeated DiscoveredAgent agents = 1;
+}
+
+// DiscoveredAgent represents an agent found via capability discovery.
+message DiscoveredAgent {
+  string peer_id = 1;
+  string agent_name = 2;
+  string agent_description = 3;
+  repeated SkillInfo skills = 4;
+}
