@@ -39,4 +39,11 @@ message P2PExtension {
   // Populated automatically by the daemon. Enables interoperability with
   // DID-based ecosystems such as ANP.
   string did_key = 4;
+
+  // Optional did:web identifier for web-based DID resolution.
+  string did_web = 5;
+  // Optional did:dns domain for DNS-based DID resolution.
+  string did_dns = 6;
+  // Optional JSON-encoded Verifiable Credentials.
+  repeated string verifiable_credentials = 7;
 }
