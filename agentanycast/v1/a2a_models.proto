@@ -121,6 +121,11 @@ message A2AEnvelope {
     StreamChunk stream_chunk = 19;
     StreamEnd stream_end = 20;
   }
+
+  // W3C Trace Context for distributed tracing (v0.7).
+  // See https://www.w3.org/TR/trace-context/
+  string trace_parent = 30;
+  string trace_state = 31;
 }
 
 enum EnvelopeType {
