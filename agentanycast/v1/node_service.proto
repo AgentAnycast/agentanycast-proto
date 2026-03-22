@@ -128,6 +128,12 @@ message SendTaskRequest {
   }
   Message message = 10;
   map<string, string> metadata = 11;
+
+  // Transport hint for multi-transport routing (v0.8).
+  // When set, the daemon prefers the specified transport for delivery.
+  // Examples: "nats://broker:4222", "ws://gateway:8080", "auto" (default).
+  // If empty or "auto", the daemon selects the best transport automatically.
+  string transport_hint = 12;
 }
 
 message SendTaskResponse {
