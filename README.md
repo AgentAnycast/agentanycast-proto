@@ -1,8 +1,17 @@
-# AgentAnycast Proto
+# ⚠️ This repository has been archived
+
+**Protocol definitions have moved to the main repository.**
+
+👉 **New location: [`agentanycast/proto/`](https://github.com/AgentAnycast/agentanycast/tree/main/proto)**
+
+This repository is archived and will no longer receive updates. All proto file changes should be submitted to the [main AgentAnycast repo](https://github.com/AgentAnycast/agentanycast).
+
+---
+
+# AgentAnycast Proto (Archived)
 
 **Protocol definitions -- the single source of truth for AgentAnycast.**
 
-[![CI](https://github.com/AgentAnycast/agentanycast-proto/actions/workflows/ci.yml/badge.svg)](https://github.com/AgentAnycast/agentanycast-proto/actions/workflows/ci.yml)
 [![Buf](https://img.shields.io/badge/Buf-STANDARD-4353ff?logo=buf&logoColor=white)](https://buf.build)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 
